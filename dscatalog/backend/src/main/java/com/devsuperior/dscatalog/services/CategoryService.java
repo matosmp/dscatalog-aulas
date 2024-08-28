@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,4 +25,12 @@ public class CategoryService {
     }
 
 
+    @Transactional(readOnly = true)
+    public CategoryDTO findById(Long id) {
+         Optional<Category> obj = categoryRepository.findById(id);
+         Category entity = obj.get(); // Obter o objeto que está dentro do optional
+         return new CategoryDTO(entity);
+    }
+
+    
 }
