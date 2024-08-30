@@ -1,15 +1,16 @@
 package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.CategoryDTO;
-import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,19 +21,26 @@ public class CategoryResource {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDTO>> findAll(){
-        List<CategoryDTO> list = categoryService.findAll();
+    public ResponseEntity<Page<CategoryDTO>> findAll(
+                    @RequestParam(value = "page", defaultValue = "0") Integer page,
+                    @RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
+                    @RequestParam(value = "orderBy", defaultValue = "name")String orderBy,
+                    @RequestParam(value = "direction", defaultValue = "ASC") String direction
+            ) {
+        PageRequest pageRequest = PageRequest.of(page,linesPerPage, Sort.Direction.valueOf(direction),orderBy);
+        Page<CategoryDTO> list = categoryService.findAllPaged(pageRequest);
+
         return ResponseEntity.ok(list);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id){
+    public ResponseEntity<CategoryDTO> findById(@PathVariable Long id) {
         CategoryDTO dto = categoryService.findById(id);
         return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDTO> insert(@RequestBody CategoryDTO dto){
+    public ResponseEntity<CategoryDTO> insert(@RequestBody CategoryDTO dto) {
         dto = categoryService.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(dto.getId()).toUri();
@@ -41,14 +49,14 @@ public class CategoryResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto){
-        dto = categoryService.update(id,dto);
+    public ResponseEntity<CategoryDTO> update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
+        dto = categoryService.update(id, dto);
         return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id){
-         categoryService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

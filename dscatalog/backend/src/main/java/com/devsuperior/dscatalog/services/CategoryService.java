@@ -8,14 +8,13 @@ import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 public class CategoryService {
@@ -25,10 +24,11 @@ public class CategoryService {
 
     @Transactional(readOnly = true) // Garantir que método seja executado por completo dentro de uma transação.
     // readOnly = true é para garantir que não trave(locking) o BANCO DE DADOS na leitura.
-    public List<CategoryDTO> findAll() {
-        List<Category> list = categoryRepository.findAll();
-        return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+    public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
+        Page<Category> list = categoryRepository.findAll(pageRequest);
+        return list.map(x -> new CategoryDTO(x));
     }
+
 
 
     @Transactional(readOnly = true)
@@ -71,5 +71,6 @@ public class CategoryService {
             throw new DataBaseException("Falha de integridade referencial");
         }
     }
+
 
 }
