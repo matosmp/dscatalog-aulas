@@ -29,8 +29,6 @@ public class CategoryService {
         return list.map(x -> new CategoryDTO(x));
     }
 
-
-
     @Transactional(readOnly = true)
     public CategoryDTO findById(Long id) {
         Optional<Category> obj = categoryRepository.findById(id);
