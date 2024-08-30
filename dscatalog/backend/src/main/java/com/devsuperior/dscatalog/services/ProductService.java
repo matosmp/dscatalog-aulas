@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +32,8 @@ public class ProductService {
 
     @Transactional(readOnly = true) // Garantir que método seja executado por completo dentro de uma transação.
     // readOnly = true é para garantir que não trave(locking) o BANCO DE DADOS na leitura.
-    public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
-        Page<Product> list = productRepository.findAll(pageRequest);
+    public Page<ProductDTO> findAllPaged(Pageable pageable) {
+        Page<Product> list = productRepository.findAll(pageable);
         return list.map(x -> new ProductDTO(x));
     }
 
