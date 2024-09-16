@@ -1,6 +1,7 @@
 package com.devsuperior.dscatalog.services;
 
 import com.devsuperior.dscatalog.repositories.ProductRepository;
+import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,13 +32,15 @@ public class ProductServiceTests {
     void setUp() throws Exception {
         existingId = 1L;
         nonExistingId = 1000L;
-        dependentId = 5L;
+        dependentId = 3L;
         //Comportamento simulado do repository
         //Mockito.when(repository.existsById(dependentId)).thenReturn(true);
         Mockito.doNothing().when(repository).deleteById(existingId);
         Mockito.when(repository.existsById(existingId)).thenReturn(true);
         Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
         Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(nonExistingId);
+        Mockito.doThrow(DataBaseException.class).when(repository).deleteById(dependentId);
+
     }
     @Test
     public void deleteShouldDoNothingWhenIdExist() {
@@ -53,7 +56,13 @@ public class ProductServiceTests {
         });
     }
 
+    @Test
+    public void deleteShouldThrowDataBaseExceptionWhenDependentId(){
 
+        Assertions.assertThrows(DataBaseException.class,()->{
+           service.delete(dependentId);
+        });
+    }
 
 
 }
