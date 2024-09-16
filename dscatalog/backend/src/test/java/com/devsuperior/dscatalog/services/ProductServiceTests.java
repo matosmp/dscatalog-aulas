@@ -32,20 +32,24 @@ public class ProductServiceTests {
         existingId = 1L;
         nonExistingId = 1000L;
         dependentId = 5L;
-
         //Comportamento simulado do repository
-        //Mockito.when(repository.existsById(existingId)).thenReturn(true);
-        //Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
         //Mockito.when(repository.existsById(dependentId)).thenReturn(true);
-
         Mockito.doNothing().when(repository).deleteById(existingId);
+        Mockito.when(repository.existsById(existingId)).thenReturn(true);
+        Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
         Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(nonExistingId);
     }
-
     @Test
     public void deleteShouldDoNothingWhenIdExist() {
         Assertions.assertDoesNotThrow(() -> {
             service.delete(existingId);
+        });
+    }
+
+    @Test
+    public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            service.delete(nonExistingId);
         });
     }
 
