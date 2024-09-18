@@ -1,18 +1,24 @@
 package com.devsuperior.dscatalog.services;
 
+import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.devsuperior.dscatalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 public class ProductServiceTests {
@@ -27,12 +33,33 @@ public class ProductServiceTests {
     private long existingId;
     private long nonExistingId;
     private long dependentId;
+    private PageImpl<Product> page; // Classe do Spring Data que permite retornar paginação, muito utilizado em teste
+    private Product product;
 
     @BeforeEach
     void setUp() throws Exception {
         existingId = 1L;
-        nonExistingId = 1000L;
+        nonExistingId = 2L;
         dependentId = 3L;
+        product = Factory.createProduct();
+        page = new PageImpl<>(List.of(product));
+
+        /* cast do Pageable porque há outras implementações do findAll, sobrecarga do método
+        *  ArgumentMatchers.any() para receber qualquer objeto
+        * .thenReturn(page) para retornar uma paginação
+        **/
+        Mockito.when(repository.findAll((Pageable) ArgumentMatchers.any())).thenReturn(page);
+
+        
+        Mockito.when(repository.save(ArgumentMatchers.any())).thenReturn(product);
+
+        //Irá retornar um optional de product
+        Mockito.when(repository.findById(existingId)).thenReturn(Optional.of(product));
+
+        //Quando o id for inexistente irá retornar um Optional vazio
+        Mockito.when(repository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+
         //Comportamento simulado do repository
         //Mockito.when(repository.existsById(dependentId)).thenReturn(true);
         Mockito.doNothing().when(repository).deleteById(existingId);
