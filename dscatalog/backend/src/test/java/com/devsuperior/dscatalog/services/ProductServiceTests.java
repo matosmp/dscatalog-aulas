@@ -64,7 +64,7 @@ public class ProductServiceTests {
 
 
         //Comportamento simulado do repository
-        //Mockito.when(repository.existsById(dependentId)).thenReturn(true);
+        Mockito.when(repository.existsById(dependentId)).thenReturn(true);
         Mockito.doNothing().when(repository).deleteById(existingId);
         Mockito.when(repository.existsById(existingId)).thenReturn(true);
         Mockito.when(repository.existsById(nonExistingId)).thenReturn(false);
