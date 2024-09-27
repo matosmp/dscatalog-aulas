@@ -2,6 +2,7 @@ package com.devsuperior.dscatalog.resources;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.services.ProductService;
+import com.devsuperior.dscatalog.services.exceptions.DataBaseException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dscatalog.tests.Factory;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,7 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,6 +48,7 @@ public class ProductResourceTests {
 
     private Long existingId;
     private Long noExistingId;
+    private Long dependentId;
 
     //Simular o comportamento do service
     @BeforeEach
@@ -54,6 +56,7 @@ public class ProductResourceTests {
 
         existingId = 1L;
         noExistingId = 2L;
+        dependentId=3L;
 
         productDTO = Factory.createProductDTO(); // Criar um produto
         page = new PageImpl<>(List.of(productDTO)); //Com PageImpl é possível instanciar um objeto.
@@ -64,6 +67,10 @@ public class ProductResourceTests {
 
         when(service.update(eq(existingId), any())).thenReturn(productDTO);
         when(service.update(eq(noExistingId), any())).thenThrow(ResourceNotFoundException.class);
+
+        doNothing().when(service).delete(existingId);
+        doThrow(ResourceNotFoundException.class).when(service).delete(noExistingId);
+        doThrow(DataBaseException.class).when(service).delete(dependentId);
 
 
     }
@@ -135,4 +142,5 @@ public class ProductResourceTests {
         result.andExpect(status().isNotFound());
     }
 
+    
 }
