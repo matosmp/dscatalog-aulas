@@ -106,8 +106,6 @@ public class ProductResourceIT {
 
         //Assertion para testar se irá ocorrer uma exceção
         result.andExpect(status().isNotFound());
-
-
     }
 
 }
