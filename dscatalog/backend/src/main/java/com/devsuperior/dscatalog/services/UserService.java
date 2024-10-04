@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.services;
 
+import com.devsuperior.dscatalog.dto.UserInsertDTO;
 import com.devsuperior.dscatalog.entities.User;
 import com.devsuperior.dscatalog.dto.RoleDTO;
 import com.devsuperior.dscatalog.dto.UserDTO;
@@ -14,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,9 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     @Transactional(readOnly = true) // Garantir que método seja executado por completo dentro de uma transação.
@@ -45,11 +50,11 @@ public class UserService {
         return new UserDTO(entity); //
     }
 
-
     @Transactional
-    public UserDTO insert(UserDTO dto) {
+    public UserDTO insert(UserInsertDTO dto) {
         User entity = new User(); // Instanciando um produto vazio
         copyDtoToEntity(dto,entity); // Copiando os dados do DTO
+        entity.setPassword( bCryptPasswordEncoder.encode(dto.getPassword())); //Criptografia da senha
         entity = userRepository.save(entity); // Salvando no banco de dados
         return new UserDTO(entity);
     }
