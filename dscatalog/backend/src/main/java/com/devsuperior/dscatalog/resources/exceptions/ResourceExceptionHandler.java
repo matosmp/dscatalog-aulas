@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -44,6 +45,19 @@ HttpStatus status = HttpStatus.NOT_FOUND;
         return ResponseEntity.status(status.value()).body(err);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<StandardError> Validation ( MethodArgumentNotValidException e, HttpServletRequest request){
+
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY; // UNPROCESSABLE_ENTITY é um retorno de validação da entidade
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(status.value());
+        err.setError("MethodArgumentNotValidException Exception.");
+        err.setMessage(e.getMessage());
+        err.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status.value()).body(err);
+    }
 
 
 }
